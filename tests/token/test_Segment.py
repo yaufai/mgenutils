@@ -28,5 +28,15 @@ class SegmentTest_equivalence(unittest.TestCase):
         seg2 = [ EndOfTie(), Time(0), Note(60), Note(60), Note(48), EndOfSeq() ]
         self.assertTrue(are_equivalent(seg1, seg2))
 
+    def test_are_equivalent_shuffled_events_3(self):
+        seg1 = [ EndOfTie(), Time(0), Note(48), Note(60), Note(60), EndOfSeq() ]
+        seg2 = [ EndOfTie(), Time(0), Note(60), Note(48), Note(48), EndOfSeq() ]
+        self.assertFalse(are_equivalent(seg1, seg2))
+    
+    def test_are_equivalent_shuffled_events_4(self):
+        seg1 = [ EndOfTie(), Time(0), Note(48), Note(60), Note(60), EndOfSeq() ]
+        seg2 = [ EndOfTie(), Time(1), Note(48), Note(60), Note(60), EndOfSeq() ]
+        self.assertTrue(are_equivalent(seg1, seg2))
+        
 if __name__ == "__main__":
     unittest.main()

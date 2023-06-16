@@ -38,10 +38,12 @@ def are_equivalent(seg1: Segment, seg2: Segment) -> bool:
     def _check_equivalence(ns1, ns2) -> bool:
         _ns1 = sorted(ns1)
         _ns2 = sorted(ns2)
-        
         for i in range(len(ns1)):
-            if _ns1[i] != _ns2[i]:
+            if _ns1[i] == _ns2[i]:
+                continue
+            else:
                 return False
+            
         
         return True
             
@@ -68,7 +70,7 @@ def are_equivalent(seg1: Segment, seg2: Segment) -> bool:
             notes_1.append(events_seg1[i])
             notes_2.append(events_seg2[i])
         elif isinstance(events_seg1[i], EndOfSeq) and isinstance(events_seg2[i], EndOfSeq):
-            pass
+            return _check_equivalence(notes_1, notes_2)
         else:
             return False
             
