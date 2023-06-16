@@ -7,6 +7,10 @@ class SemanticToken(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __repr__(self) -> str:
         pass
+    
+    @abc.abstractmethod
+    def __eq__(self, __value: "SemanticToken") -> bool:
+        pass
 
 class Padding(SemanticToken):
     def __init__(self) -> None:
@@ -14,6 +18,9 @@ class Padding(SemanticToken):
     
     def __repr__(self) -> str:
         return "パディング"
+    
+    def __eq__(self, padding: SemanticToken) -> bool:
+        return isinstance(padding, Padding)
 
 class Note(SemanticToken):
     def __init__(self, pitch: int) -> None:
@@ -23,8 +30,8 @@ class Note(SemanticToken):
     def __lt__(self, note: "Note") -> bool:
         return self.pitch < note.pitch
     
-    def __eq__(self, note: "Note") -> bool:
-        return self.pitch == note.pitch
+    def __eq__(self, note: SemanticToken) -> bool:
+        return isinstance(note, Note) and self.pitch == note.pitch
     
     def __repr__(self) -> str:
         return f"音符（{self.pitch}）"
@@ -34,8 +41,8 @@ class Time(SemanticToken):
         super().__init__()
         self.time = time
         
-    def __eq__(self, time: "Time") -> bool:
-        return self.time == time.time
+    def __eq__(self, time: SemanticToken) -> bool:
+        return isinstance(time, Time) and self.time == time.time
     
     def __repr__(self) -> str:
         return f"時間（{self.time}）"
@@ -48,6 +55,9 @@ class NoteOnOff(SemanticToken):
     def __repr__(self) -> str:
         return "鳴り始め" if self.on else "鳴り終わり"
     
+    def __eq__(self, noteonoff: SemanticToken) -> bool:
+        return isinstance(noteonoff, NoteOnOff) and self.on == noteonoff.on
+    
 class EndOfTie(SemanticToken):
     def __init__(self) -> None:
         super().__init__()
@@ -55,9 +65,15 @@ class EndOfTie(SemanticToken):
     def __repr__(self) -> str:
         return "タイ終了"
     
+    def __eq__(self, endoftie: SemanticToken) -> bool:
+        return isinstance(endoftie, EndOfTie)
+    
 class EndOfSeq(SemanticToken):
     def __init__(self) -> None:
         super().__init__()
     
     def __repr__(self) -> str:
         return "セグメント終了"
+    
+    def __eq__(self, endofseq: SemanticToken) -> bool:
+        return isinstance(endofseq, EndOfSeq)
