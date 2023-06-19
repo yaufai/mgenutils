@@ -1,77 +1,74 @@
-from typing import List
+from typing import List, Union, Dict
+from collections import defaultdict
 from mgenutils.token.SemanticToken import EndOfTie, SemanticToken, Time, Note, NoteOnOff, EndOfSeq
 
-Segment = List[SemanticToken]
+OnsetNotesMap = Dict[bool, List[Note]]
 
-def are_equivalent(seg1: Segment, seg2: Segment) -> bool:
-    if len(seg1) != len(seg2):
-        return False
+class Segment:
+    tie: List[Note]
+    time_event_map: defaultdict[int, OnsetNotesMap]
     
-    # タイ部分が一致するか確認
-
-    def _idx_end_of_tie(lst) -> int:
-        for i in range(len(lst)):
-            if isinstance(lst[i], EndOfTie):
-                return i 
-        return -1
-    
-    tie_idx1 = _idx_end_of_tie(seg1)
-    tie_idx2 = _idx_end_of_tie(seg2)
-    
-    if tie_idx1 != tie_idx2:
-        return False
-    
-    tie_seg1 = sorted(seg1[:tie_idx1])
-    tie_seg2 = sorted(seg2[:tie_idx2])
-    
-    for i in range(tie_idx1):
-        if tie_seg1[i] != tie_seg2[i]:
-            return False
-    
-    # event部分が一致するか確認
-    
-    events_seg1 = seg1[tie_idx1 + 1: ]
-    events_seg2 = seg2[tie_idx2 + 1: ]
-    
-
-    
-    def _check_equivalence(ns1, ns2) -> bool:
-        _ns1 = sorted(ns1)
-        _ns2 = sorted(ns2)
-        for i in range(len(ns1)):
-            if _ns1[i] == _ns2[i]:
-                continue
-            else:
-                return False
-            
+    def __init__(self, tokens: List[SemanticToken]) -> None:
+        _endoftie = [
+            idx for idx in range(len(tokens))
+            if tokens[idx] == EndOfTie()
+        ][0]
         
-        return True
+        self.tie = tokens[:_endoftie]
+        
+        self.time_event_map = defaultdict(lambda: { True: [], False: [] })
+        
+        cur_time  = None
+        cur_onset = None
+        for token in tokens[_endoftie + 1:len(tokens) - 1]:
+            if isinstance(token, Time):
+                cur_time = token.time
+            elif isinstance(token, NoteOnOff):
+                cur_onset = token.on
+            elif isinstance(token, Note):
+                self.time_event_map[cur_time][cur_onset].append(token)
+            else:
+                raise AssertionError(f"Unexpected type of token: {token}")
             
-    notes_1 = []
-    notes_2 = []
-    for i in range(len(events_seg1)):
-        if isinstance(events_seg1[i], Time) and isinstance(events_seg2[i], Time):
-            if events_seg1[i] != events_seg2[i]:
-                return False
-            if _check_equivalence(notes_1, notes_2):
-                notes_1 = []
-                notes_2 = []
+    
+    def contains_as_tie(self, note: Note) -> bool:
+        return note in self.tie
+    
+    def get_times(self) -> List[Time]:
+        return [ Time(time) for time in self.time_event_map.keys() ]
+    
+    def __getitem__(self, time: Union[Time, int]) -> OnsetNotesMap:
+        if isinstance(time, Time):
+            return self.time_event_map[time.time]
+        else:
+            return self.time_event_map[time]
+    
+    def __eq__(self, segment: "Segment") -> bool:
+        def _are_shuffled_lists(x: list, y: list) -> bool:
+            if len(x) == len(y):
+                _x = sorted(x)
+                _y = sorted(y)
+                for i in range(len(x)):
+                    if _x[i] != _y[i]:
+                        return False
+                return True
             else:
                 return False
-        elif isinstance(events_seg1[i], NoteOnOff) and isinstance(events_seg2[i], NoteOnOff):
-            if events_seg1[i] != events_seg2[i]:
-                return False
-            if _check_equivalence(notes_1, notes_2):
-                notes_1 = []
-                notes_2 = []
-            else:
-                return False
-        elif isinstance(events_seg1[i], Note) and isinstance(events_seg2[i], Note):
-            notes_1.append(events_seg1[i])
-            notes_2.append(events_seg2[i])
-        elif isinstance(events_seg1[i], EndOfSeq) and isinstance(events_seg2[i], EndOfSeq):
-            return _check_equivalence(notes_1, notes_2)
+                
+        # タイ部分が一致するか確認
+        if not _are_shuffled_lists(self.tie, segment.tie):
+            return False
+        
+        # event部分が一致するか確認
+        time1 = self.get_times()
+        time2 = segment.get_times()
+        
+        if _are_shuffled_lists(time1, time2):
+            for time in time1:
+                for b in [True, False]:
+                    if not _are_shuffled_lists(self[time][b], segment[time][b]):
+                        return False
+            return True
         else:
             return False
-            
-    return True
+        

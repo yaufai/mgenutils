@@ -1,7 +1,6 @@
 import unittest
 from os.path import dirname, abspath
 from mgenutils.midi.MIDIFile import load_midi
-from mgenutils.token.Segment import are_equivalent
 from mgenutils.token.SemanticToken import EndOfSeq, EndOfTie, Time, Note, NoteOnOff
 
 simple_midi = load_midi(abspath(dirname(__file__)).replace("midi", "resources/simple_1.mid"))
@@ -16,7 +15,7 @@ simple_midi = load_midi(abspath(dirname(__file__)).replace("midi", "resources/si
 class MIDIFileTest__PianoTokenSystem_get_segment_in_frame(unittest.TestCase):
     def assert_equivalent(self, actual, expected):
         self.assertTrue(
-            are_equivalent(actual, expected),
+            actual == expected,
             f"\nTwo segments are not equivalent\n* expected: {expected.__repr__()}\n* actual  : {actual.__repr__()}"
         )
     def test_case1_1(self):

@@ -1,5 +1,4 @@
 import unittest
-from mgenutils.token.Segment import are_equivalent
 from mgenutils.token.SemanticToken import EndOfSeq, EndOfTie, Note, Time, Padding, NoteOnOff
 from mgenutils.token.PianoTokenSystem import PianoTokenSystem
 
