@@ -2,7 +2,7 @@ from typing import List
 import pretty_midi as pm
 from collections import defaultdict
 from mgenutils.token.Segment import Segment
-from mgenutils.midi.MIDIInstrument import MIDIInstrument
+from mgenutils.midi.MIDIInstrument import MIDIInstrument, convert_pm_instrument
 from mgenutils.midi.MIDIEvent import MIDIEvent
 from mgenutils.token.SemanticToken import Note, Time, NoteOnOff, EndOfSeq, EndOfTie
 
@@ -11,11 +11,8 @@ nframes_per_sec = 100
 
 class MIDIFile:
     instruments: List[MIDIInstrument]
-    def __init__(self, midi) -> None:
-        self.instruments = [
-            MIDIInstrument(instrument)
-            for instrument in midi.instruments
-        ]
+    def __init__(self, instruments: List[MIDIInstrument]) -> None:
+        self.instruments = instruments
 
     def get_segment_in_frame(self, start: FrameTime, end: FrameTime) -> Segment:
         """
@@ -66,4 +63,10 @@ class MIDIFile:
         return ties + [ EndOfTie() ] + events + [ EndOfSeq() ]
 
 def load_midi(fpath) -> MIDIFile:
-    return MIDIFile(pm.PrettyMIDI(fpath))
+    midi = pm.PrettyMIDI(fpath)
+    return MIDIFile(
+        instruments=[
+            convert_pm_instrument(instrument)
+            for instrument in midi.instruments
+        ]
+    )

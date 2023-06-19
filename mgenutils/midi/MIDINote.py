@@ -1,19 +1,33 @@
+from typing import Literal
+
+from mgenutils.token.SemanticToken import TimeLike, Time
+
+MIDINoteScale = Literal["original", "frame"]
+
 class MIDINote:
-    start: int
-    end  : int
-    pitch: int
-    scale: str
-    def __init__(self, note=None) -> None:
-        if note is None:
-            pass
-        else:
-            self.start = note.start
-            self.end   = note.end
-            self.pitch = note.pitch
-            self.scale = "original"
+    velocity: int
+    start   : int
+    end     : int
+    pitch   : int
+    scale   : MIDINoteScale
+    def __init__(self, velocity, start: TimeLike, end: TimeLike, pitch, scale="original") -> None:
+        self.velocity = velocity
+        self.start    = Time.to_int_time(start)
+        self.end      = Time.to_int_time(end)
+        self.pitch    = pitch
+        self.scale    = scale
+    
+    def __eq__(self, note: "MIDINote") -> bool:
+        return all([
+            self.velocity == note.velocity,
+            self.pitch    == note.pitch,
+            self.start    == note.start,
+            self.end      == note.end,
+            self.scale    == note.scale,
+        ])
 
     def __repr__(self) -> str:
-        return f"NOTE({self.pitch}): {self.start} ~ {self.end} in {self.scale} scale"
+        return f"NOTE({self.pitch}): {self.start} ~ {self.end} in {self.scale} scale at velocity {self.velocity}"
             
     def set_scale(self, scale, nframes_per_sec: int) -> None:
         if scale == "frame":
@@ -23,7 +37,6 @@ class MIDINote:
                 self.end   = round(nframes_per_sec * self.end)
         else:
             raise NotImplementedError()
-    
         
     def begins_between(self, start: int, end: int) -> bool:
         start_condition = self.start >= start
@@ -46,4 +59,11 @@ class MIDINote:
     
     def ends_after(self, end: int) -> bool:
         return self.end > end
-    
+
+def convert_pm_note(note) -> MIDINote:
+    return MIDINote(
+        velocity = note.velocity,
+        start    = note.start,
+        end      = note.end,
+        pitch    = note.pitch
+    )

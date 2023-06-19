@@ -1,4 +1,5 @@
 import abc
+from typing import Union
 
 class SemanticToken(metaclass=abc.ABCMeta):
     def is_semantic_token() -> bool:
@@ -46,6 +47,15 @@ class Time(SemanticToken):
     
     def __repr__(self) -> str:
         return f"時間（{self.time}）"
+
+    def __add__(self, time: Union[int, "Time"]) -> "Time":
+        return Time(self.time + self.to_int_time(time))
+    
+    @classmethod
+    def to_int_time(cls, time: "TimeLike") -> int:
+        return time.time if isinstance(time, Time) else time
+
+TimeLike = Union[Time, int]
 
 class NoteOnOff(SemanticToken):
     def __init__(self, on: bool) -> None:

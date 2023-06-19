@@ -1,9 +1,12 @@
 import unittest
 from mgenutils.midi import MIDINote
 
-note1 = MIDINote.MIDINote()
-note1.start = 15
-note1.end   = 25
+note1 = MIDINote.MIDINote(
+    velocity = 100,
+    start    = 15,
+    end      = 25,
+    pitch    = 48    
+)
 
 class MIDINoteTest_range(unittest.TestCase):
     def test_begins_before_positive_1(self):

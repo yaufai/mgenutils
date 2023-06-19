@@ -1,6 +1,6 @@
 from typing import List, Union, Dict
 from collections import defaultdict
-from mgenutils.token.SemanticToken import EndOfTie, SemanticToken, Time, Note, NoteOnOff, EndOfSeq
+from mgenutils.token.SemanticToken import EndOfTie, SemanticToken, Time, Note, NoteOnOff, EndOfSeq, TimeLike
 
 OnsetNotesMap = Dict[bool, List[Note]]
 
@@ -37,11 +37,8 @@ class Segment:
     def get_times(self) -> List[Time]:
         return [ Time(time) for time in self.time_event_map.keys() ]
     
-    def __getitem__(self, time: Union[Time, int]) -> OnsetNotesMap:
-        if isinstance(time, Time):
-            return self.time_event_map[time.time]
-        else:
-            return self.time_event_map[time]
+    def __getitem__(self, time: TimeLike) -> OnsetNotesMap:
+        return self.time_event_map[Time.to_int_time(time)]
     
     def __eq__(self, segment: "Segment") -> bool:
         def _are_shuffled_lists(x: list, y: list) -> bool:

@@ -1,4 +1,6 @@
 import unittest
+from mgenutils.midi.MIDINote import MIDINote
+from mgenutils.token.Segment import Segment
 from mgenutils.token.SemanticToken import EndOfSeq, EndOfTie, Note, Time, Padding, NoteOnOff
 from mgenutils.token.PianoTokenSystem import PianoTokenSystem
 
@@ -59,3 +61,44 @@ class PianoTokenSystemTest_decode(unittest.TestCase):
     
     def test_decode_time_1(self):
         self.assertEqual(PianoTokenSystem.decode_token(158), Time(25))
+        
+class PianoTokenSystemTest_decode(unittest.TestCase):
+    def test_midi_creation_1(self):
+        midi = PianoTokenSystem.decode_segments_to_midi([
+            Segment([
+                EndOfTie(),
+                Time(0),
+                NoteOnOff(True),
+                Note(48),
+                Time(100),
+                NoteOnOff(False),
+                Note(48),
+                EndOfSeq()
+            ])
+        ], 100)
+        piano = midi.instruments[0]
+        self.assertEqual(piano.program, 0)
+        self.assertListEqual(piano.notes, [ MIDINote(100, 0, 100, 48) ])
+        
+    def test_midi_creation_2(self):
+        midi = PianoTokenSystem.decode_segments_to_midi([
+            Segment([
+                EndOfTie(),
+                Time(0),
+                NoteOnOff(True),
+                Note(48),
+                EndOfSeq()
+            ]),
+            Segment([
+                Note(48),
+                EndOfTie(),
+                Time(0),
+                Time(50),
+                NoteOnOff(False),
+                Note(48),
+                EndOfSeq()
+            ])
+        ], 50)
+        piano = midi.instruments[0]
+        self.assertEqual(piano.program, 0)
+        self.assertListEqual(piano.notes, [ MIDINote(100, 0, 100, 48) ])

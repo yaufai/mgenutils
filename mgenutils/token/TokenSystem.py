@@ -1,5 +1,6 @@
 import abc
 from typing import List
+from mgenutils.midi.MIDIFile import MIDIFile
 from mgenutils.token.Segment import Segment
 from mgenutils.token.SemanticToken import SemanticToken
 
@@ -20,10 +21,13 @@ class TokenSystem(metaclass=abc.ABCMeta):
         """
         pass
 
-    @abc.abstractmethod
+    @abc.abstractclassmethod
     def encode_segment(segment: Segment) -> List[RawToken]:
         """
         MIDIファイルの一部分を受け取って対応するトークン列に翻訳する
         """
         pass
     
+    @abc.abstractclassmethod
+    def decode_segments_to_midi(segments: List[Segment], sec_per_segment: int) -> MIDIFile:
+        pass
