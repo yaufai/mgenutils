@@ -1,5 +1,6 @@
 from typing import List, Union
-from mgenutils.midi.MIDINote import MIDINote, convert_pm_note
+import pretty_midi as pm
+from mgenutils.midi.MIDINote import MIDINote, convert_pm_note, convert_to_pm_note
 
 class MIDIInstrument:
     notes  : List[MIDINote]
@@ -22,3 +23,8 @@ def convert_pm_instrument(instrument) -> MIDIInstrument:
         ],
         instrument.program
     )
+
+def convert_to_pm_instrument(instrument: MIDIInstrument):
+    pm_instrument = pm.Instrument(instrument.program)
+    pm_instrument.notes = [ convert_to_pm_note(n) for n in instrument.notes ]
+    return pm_instrument

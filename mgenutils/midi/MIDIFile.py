@@ -2,7 +2,7 @@ from typing import List
 import pretty_midi as pm
 from collections import defaultdict
 from mgenutils.token.Segment import Segment
-from mgenutils.midi.MIDIInstrument import MIDIInstrument, convert_pm_instrument
+from mgenutils.midi.MIDIInstrument import MIDIInstrument, convert_pm_instrument, convert_to_pm_instrument
 from mgenutils.midi.MIDIEvent import MIDIEvent
 from mgenutils.token.SemanticToken import Note, Time, NoteOnOff, EndOfSeq, EndOfTie
 
@@ -61,9 +61,17 @@ class MIDIFile:
                 events.append(Note(event.pitch))
         
         return ties + [ EndOfTie() ] + events + [ EndOfSeq() ]
+    
+    def save(self, fname: str) -> None:
+        midi = pm.PrettyMIDI()
+        for instrument in self.instruments:
+            midi.instruments.append(convert_to_pm_instrument(instrument))
+        
+        midi.write(fname)
 
 def load_midi(fpath) -> MIDIFile:
     midi = pm.PrettyMIDI(fpath)
+    print(midi.instruments[0].notes)
     return MIDIFile(
         instruments=[
             convert_pm_instrument(instrument)
