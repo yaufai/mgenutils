@@ -1,6 +1,8 @@
 from typing import List, Tuple
-from mgenutils.midi import MIDIInstrument, MIDIFile, MIDINote
 
+import numpy as np
+
+from mgenutils.midi import MIDIInstrument, MIDIFile, MIDINote
 from mgenutils.token.Segment       import Segment
 from mgenutils.token.TokenSystem   import RawToken, TokenSystem
 from mgenutils.token.SemanticToken import SemanticToken, Note, NoteOnOff, EndOfSeq, EndOfTie, Time, Padding
@@ -13,10 +15,21 @@ class PianoTokenSystem(TokenSystem):
     def __init__(self) -> None:
         super().__init__()
     
-    def encode_segment(segment: Segment) -> List[RawToken]:
-        return super().encode_segment()
+    @classmethod
+    def encode_segment(cls, segment: Segment) -> np.ndarray:
+        rtn = [ _n for _n in segment.tie ]
+        for time in sorted(segment.get_times()):
+            rtn.append(time)
+            
+            for onset in [True, False]:
+                if len(segment[time][onset]) > 0:
+                    rtn.append(NoteOnOff(onset))
+                    rtn += segment[time][onset]
+            
+        return np.array([ cls.encode_token(t) for t in rtn ])
     
-    def encode_token(token: SemanticToken) -> RawToken:
+    @classmethod
+    def encode_token(cls, token: SemanticToken) -> RawToken:
         if isinstance(token, Padding):
             return 0
         elif isinstance(token, EndOfSeq):
@@ -32,7 +45,8 @@ class PianoTokenSystem(TokenSystem):
         else:
             raise NotImplementedError()
     
-    def decode_token(token: RawToken) -> SemanticToken:
+    @classmethod
+    def decode_token(cls, token: RawToken) -> SemanticToken:
         if token == 0:
             return Padding()
         elif token == 1:
@@ -47,7 +61,8 @@ class PianoTokenSystem(TokenSystem):
         else:
             return Time(token - 3 - NUM_OF_PITCHES - NUM_OF_ONSETS) 
 
-    def decode_segments_to_midi(segments: List[Segment], sec_per_segment: int) -> MIDIFile.MIDIFile:
+    @classmethod
+    def decode_segments_to_midi(cls, segments: List[Segment], sec_per_segment: int) -> MIDIFile.MIDIFile:
         cur_time = 0
         on_notes: List[Tuple[Note, Time]] = []
         
@@ -87,7 +102,6 @@ class PianoTokenSystem(TokenSystem):
                     ))
                     on_notes = [ n for n in on_notes if n[0] != note ]
             
-            # TODO
             cur_time += sec_per_segment
 
         return MIDIFile.MIDIFile([ piano ])

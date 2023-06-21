@@ -1,6 +1,7 @@
 import unittest
 from os.path import dirname, abspath
 from mgenutils.midi.MIDIFile import load_midi
+from mgenutils.token.Segment import Segment
 from mgenutils.token.SemanticToken import EndOfSeq, EndOfTie, Time, Note, NoteOnOff
 
 simple_midi = load_midi(abspath(dirname(__file__)).replace("midi", "resources/simple_1.mid"))
@@ -21,29 +22,29 @@ class MIDIFileTest__PianoTokenSystem_get_segment_in_frame(unittest.TestCase):
     def test_case1_1(self):
         self.assert_equivalent(
             simple_midi.get_segment_in_frame(100, 200),
-            [ EndOfTie(), EndOfSeq() ]
+            Segment([ EndOfTie(), EndOfSeq() ])
         )
     
     def test_case2_1(self):
         self.assert_equivalent(
             simple_midi.get_segment_in_frame(40, 60),
-            [ EndOfTie(), Time(10), NoteOnOff(True), Note(48), EndOfSeq() ]
+            Segment([ EndOfTie(), Time(10), NoteOnOff(True), Note(48), EndOfSeq() ])
         )
     
     def test_case3_1(self):
         self.assert_equivalent(
             simple_midi.get_segment_in_frame(30, 80),
-            [ EndOfTie(), Time(20), NoteOnOff(True), Note(48), Time(45), NoteOnOff(False), Note(48), EndOfSeq() ]
+            Segment([ EndOfTie(), Time(20), NoteOnOff(True), Note(48), Time(45), NoteOnOff(False), Note(48), EndOfSeq() ])
         )
     
     def test_case4_1(self):
         self.assert_equivalent(
             simple_midi.get_segment_in_frame(30, 60),
-            [ EndOfTie(), Time(20), NoteOnOff(True), Note(48), EndOfSeq() ]
+            Segment([ EndOfTie(), Time(20), NoteOnOff(True), Note(48), EndOfSeq() ])
         )
 
     def test_case5_1(self):
         self.assert_equivalent(
             simple_midi.get_segment_in_frame(10, 20),
-            [ Note(48), EndOfTie(), EndOfSeq() ]
+            Segment([ Note(48), EndOfTie(), EndOfSeq() ])
         )

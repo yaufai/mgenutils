@@ -60,7 +60,7 @@ class MIDIFile:
                     events.append(NoteOnOff(event.onset))
                 events.append(Note(event.pitch))
         
-        return ties + [ EndOfTie() ] + events + [ EndOfSeq() ]
+        return Segment(ties + [ EndOfTie() ] + events + [ EndOfSeq() ])
     
     def save(self, fname: str) -> None:
         midi = pm.PrettyMIDI()
@@ -71,7 +71,6 @@ class MIDIFile:
 
 def load_midi(fpath) -> MIDIFile:
     midi = pm.PrettyMIDI(fpath)
-    print(midi.instruments[0].notes)
     return MIDIFile(
         instruments=[
             convert_pm_instrument(instrument)

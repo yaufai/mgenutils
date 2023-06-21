@@ -41,6 +41,9 @@ class Time(SemanticToken):
     def __init__(self, time: int) -> None:
         super().__init__()
         self.time = time
+    
+    def __lt__(self, time: "TimeLike") -> bool:
+        return self.time < time.time
         
     def __eq__(self, time: SemanticToken) -> bool:
         return isinstance(time, Time) and self.time == time.time

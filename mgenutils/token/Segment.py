@@ -1,6 +1,7 @@
-from typing import List, Union, Dict
+from typing import List, Dict
 from collections import defaultdict
-from mgenutils.token.SemanticToken import EndOfTie, SemanticToken, Time, Note, NoteOnOff, EndOfSeq, TimeLike
+
+from mgenutils.token.SemanticToken import EndOfTie, SemanticToken, Time, Note, NoteOnOff, TimeLike
 
 OnsetNotesMap = Dict[bool, List[Note]]
 
@@ -68,4 +69,5 @@ class Segment:
             return True
         else:
             return False
+    
         
