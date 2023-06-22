@@ -1,6 +1,9 @@
-from typing import List
-import pretty_midi as pm
+from typing import List, Optional
 from collections import defaultdict
+import numpy as np
+import pretty_midi as pm
+from mir_eval.transcription import evaluate
+from mgenutils.metrics.MetricsDict import MetricsDict
 from mgenutils.token.Segment import Segment
 from mgenutils.midi.MIDIInstrument import MIDIInstrument, convert_pm_instrument, convert_to_pm_instrument
 from mgenutils.midi.MIDIEvent import MIDIEvent
@@ -68,6 +71,34 @@ class MIDIFile:
             midi.instruments.append(convert_to_pm_instrument(instrument))
         
         midi.write(fname)
+    
+    def instrument(self, program: int) -> Optional[MIDIInstrument]:
+        instrument = [ i for i in self.instruments if i.program == program ]
+        if len(instrument) == 1:
+            return instrument[0]
+        else:
+            return None
+    
+    def metrics_from(self, midi_ref: "MIDIFile", program: int) -> Optional[MetricsDict]:
+        """
+        参照先と比較したときの損失を測定する。
+        """
+
+        notes_est = self.instrument(program)
+        notes_ref = midi_ref.instrument(program)
+        
+        if notes_est is None or notes_ref is None:
+            return None
+        
+        notes_est = notes_est.notes
+        notes_ref = notes_ref.notes
+    
+        return evaluate(
+            np.array([ note.get_interval() for note in notes_ref ]),
+            np.array([ note.pitch for note in notes_ref ]),
+            np.array([ note.get_interval() for note in notes_est ]),
+            np.array([ note.pitch for note in notes_est ])
+        )
 
 def load_midi(fpath) -> MIDIFile:
     midi = pm.PrettyMIDI(fpath)

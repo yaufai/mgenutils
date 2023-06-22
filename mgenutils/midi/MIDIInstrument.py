@@ -1,5 +1,6 @@
 from typing import List, Union
 import pretty_midi as pm
+import numpy as np
 from mgenutils.midi.MIDINote import MIDINote, convert_pm_note, convert_to_pm_note
 
 class MIDIInstrument:
@@ -15,6 +16,12 @@ class MIDIInstrument:
             self.notes.append(note)
         else:
             self.notes += note
+    
+    def get_intervals(self) -> np.ndarray:
+        return np.array([ note.get_interval() for note in self.notes ])
+    
+    def get_pitches(self) -> np.ndarray:
+        return np.array([ note.pitch for note in self.notes ])
         
 def convert_pm_instrument(instrument) -> MIDIInstrument:
     return MIDIInstrument(

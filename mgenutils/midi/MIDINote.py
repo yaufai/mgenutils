@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Union, Tuple
 import pretty_midi as pm
 from mgenutils.token.SemanticToken import TimeLike, Time
 
@@ -63,6 +63,9 @@ class MIDINote:
     
     def ends_after(self, end: int) -> bool:
         return self.end > end
+
+    def get_interval(self) -> Tuple[int, int]:
+        return (self.start, self.end)
 
 def convert_pm_note(note) -> MIDINote:
     return MIDINote(

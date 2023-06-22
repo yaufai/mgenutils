@@ -1,4 +1,7 @@
+future==0.18.3
 mido==1.2.10
+mir-eval==0.7
 numpy==1.24.3
 pretty-midi==0.2.10
+scipy==1.10.1
 six==1.16.0
