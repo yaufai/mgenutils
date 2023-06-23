@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -60,6 +60,10 @@ class PianoTokenSystem(TokenSystem):
             return NoteOnOff(value == 1)
         else:
             return Time(token - 3 - NUM_OF_PITCHES - NUM_OF_ONSETS) 
+
+    @classmethod
+    def decode_segment(cls, segment: Union[List[RawToken], np.ndarray]) -> Segment:
+        return Segment([ cls.decode_token(t) for t in segment ])
 
     @classmethod
     def decode_segments_to_midi(cls, segments: List[Segment], sec_per_segment: int) -> MIDIFile.MIDIFile:

@@ -1,5 +1,5 @@
 import abc
-from typing import List
+from typing import List, Union
 from numpy  import ndarray
 from mgenutils.midi.MIDIFile import MIDIFile
 from mgenutils.token.Segment import Segment
@@ -33,6 +33,10 @@ class TokenSystem(metaclass=abc.ABCMeta):
     def to_ndarray(cls, segment: Segment) -> ndarray:
         return cls.encode_segment(segment)
     
+    @abc.abstractclassmethod
+    def decode_segment(cls, segment: Union[List[RawToken], ndarray]) -> Segment:
+        pass
+
     @abc.abstractclassmethod
     def decode_segments_to_midi(cls, segments: List[Segment], sec_per_segment: int) -> MIDIFile:
         pass
