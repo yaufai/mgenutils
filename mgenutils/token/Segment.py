@@ -10,27 +10,33 @@ class Segment:
     time_event_map: defaultdict[int, OnsetNotesMap]
     
     def __init__(self, tokens: List[SemanticToken]) -> None:
-        _endoftie = [
+        """
+        入力されたトークン列から構造化したデータを作成する。
+        もしEndOfTieトークンが存在しなければ、NoteOn/Offは無視されてすべてTieとして解釈する。
+        もしEndOfTieトークンが複数存在するなら最初のEndOfTieまでを有効なTieとみなし、最後のEndOfTie以降を有効なイベントとみなす。
+        """
+        tokens_endoftie = [
             idx for idx in range(len(tokens))
             if tokens[idx] == EndOfTie()
-        ][0]
-        
-        self.tie = tokens[:_endoftie]
-        
+        ]
         self.time_event_map = defaultdict(lambda: { True: [], False: [] })
+
+        if len(tokens_endoftie) == 0:
+            self.tie = [ t for t in tokens if isinstance(t, Note) ]
+        else:
+            self.tie = tokens[:tokens_endoftie[0]]
         
-        cur_time  = None
-        cur_onset = None
-        for token in tokens[_endoftie + 1:len(tokens) - 1]:
-            if isinstance(token, Time):
-                cur_time = token.time
-            elif isinstance(token, NoteOnOff):
-                cur_onset = token.on
-            elif isinstance(token, Note):
-                self.time_event_map[cur_time][cur_onset].append(token)
-            else:
-                raise AssertionError(f"Unexpected type of token: {token}")
-            
+            cur_time  = None
+            cur_onset = None
+            for token in tokens[tokens_endoftie[len(tokens_endoftie) - 1] + 1:len(tokens) - 1]:
+                if isinstance(token, Time):
+                    cur_time = token.time
+                elif isinstance(token, NoteOnOff):
+                    cur_onset = token.on
+                elif isinstance(token, Note):
+                    self.time_event_map[cur_time][cur_onset].append(token)
+                else:
+                    raise AssertionError(f"Unexpected type of token: {token}")
     
     def contains_as_tie(self, note: Note) -> bool:
         return note in self.tie
