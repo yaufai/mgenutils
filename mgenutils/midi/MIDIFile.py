@@ -108,3 +108,6 @@ def load_midi(fpath) -> MIDIFile:
             for instrument in midi.instruments
         ]
     )
+
+def convert_to_pm(midi: pm.PrettyMIDI) -> MIDIFile:
+    return MIDIFile([ convert_pm_instrument(i) for i in midi.instruments ])
